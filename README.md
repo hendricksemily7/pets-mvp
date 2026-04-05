@@ -52,6 +52,19 @@ npm run dev
 | `npm run prisma:migrate` | Create new migration |
 | `npm test` | Run tests |
 
+## Prisma Studio
+
+Prisma Studio is a GUI for viewing and editing your database data. To open it:
+
+```bash
+npx prisma studio
+```
+
+This opens a browser at http://localhost:5555 where you can:
+- Browse all tables (Pet, Vaccine, Allergy, MedicalRecordType)
+- Add, edit, and delete records
+- View relationships between tables
+
 ## Tech Stack
 
 - **Frontend:** React 19, Next.js 16 (Turbopack), Tailwind CSS 4

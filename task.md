@@ -27,9 +27,7 @@ Every pet has:
 
 Every pet can have two kinds of medical records:
 - Vaccines which have the name of the vaccine and a date it was administered
-- Allergies which have the name of the allergy, the pet's reactions (e.g., hives, rash) and
-severity (mild or severe)
-
+- Allergies which have the name of the allergy, the pet's reactions (e.g., hives, rash) and severity (mild or severe)
 
 # User Stories
 - As a user, I can add a new pet with all required information

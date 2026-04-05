@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Pet {
+  id          String    @id @default(cuid())
+  name        String
+  animalType  String
+  ownerName   String
+  dateOfBirth DateTime
+  photoUrl    String?
+  vaccines    Vaccine[]
+  allergies   Allergy[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Vaccine {
+  id               String   @id @default(cuid())
+  petId            String
+  pet              Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  name             String
+  dateAdministered DateTime
+  isRecurring      Boolean  @default(false)
+  intervalMonths   Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Allergy {
+  id        String   @id @default(cuid())
+  petId     String
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  name      String
+  reactions String[]
+  severity  String   // "mild" | "severe"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MedicalRecordType {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  fields    Json
+  createdAt DateTime @default(now())
+}

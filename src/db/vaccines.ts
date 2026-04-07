@@ -22,8 +22,23 @@ export async function createVaccine(petId: string, data: CreateVaccineInput) {
       petId,
       name: data.name,
       dateAdministered: data.dateAdministered,
+      isRecurring: data.isRecurring,
       intervalMonths: data.intervalMonths,
+      documentUrl: data.documentUrl,
     },
+  });
+}
+
+export async function updateVaccine(id: string, data: UpdateVaccineInput) {
+  return prisma.vaccine.update({
+    where: { id },
+    data,
+  });
+}
+
+export async function deleteVaccine(id: string) {
+  return prisma.vaccine.delete({
+    where: { id },
   });
 }        
 

@@ -23,6 +23,7 @@ export async function createAllergy(petId: string, data: CreateAllergyInput) {
       name: data.name,
       reactions: data.reactions,
       severity: data.severity,
+      documentUrl: data.documentUrl,
     },
   });
 }

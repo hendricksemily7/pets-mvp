@@ -36,6 +36,7 @@ export const createAllergySchema = z.object({
   name: z.string().min(1),
   reactions: z.array(z.string()).default([]),
   severity: z.enum(['mild', 'severe']),
+  documentUrl: z.string().optional(),
 });
 
 export const updateAllergySchema = createAllergySchema.partial();
@@ -49,6 +50,7 @@ export const createVaccineSchema = z.object({
   dateAdministered: z.coerce.date(),
   isRecurring: z.boolean().default(false),
   intervalMonths: z.number().int().positive().optional(),
+  documentUrl: z.string().optional(),
 });
 
 export const updateVaccineSchema = createVaccineSchema.partial();

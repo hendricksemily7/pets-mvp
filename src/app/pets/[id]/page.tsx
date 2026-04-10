@@ -36,8 +36,12 @@ interface Pet {
 function calculateNextDue(vaccine: Vaccine): Date | null {
   if (!vaccine.isRecurring || !vaccine.intervalMonths) return null;
   const administered = new Date(vaccine.dateAdministered);
-  const nextDue = new Date(administered);
-  nextDue.setMonth(nextDue.getMonth() + vaccine.intervalMonths);
+  // Use UTC methods to avoid timezone shifts
+  const nextDue = new Date(Date.UTC(
+    administered.getUTCFullYear(),
+    administered.getUTCMonth() + vaccine.intervalMonths,
+    administered.getUTCDate()
+  ));
   return nextDue;
 }
 
@@ -46,20 +50,31 @@ function formatDate(dateString: string): string {
     year: "numeric",
     month: "short",
     day: "numeric",
+    timeZone: "UTC",
   });
 }
 
 function calculateAge(dateOfBirth: string): string {
   const birth = new Date(dateOfBirth);
   const now = new Date();
-  const years = now.getFullYear() - birth.getFullYear();
-  const months = now.getMonth() - birth.getMonth();
+  
+  // Use UTC for birth date to avoid timezone shifts
+  const birthYear = birth.getUTCFullYear();
+  const birthMonth = birth.getUTCMonth();
+  
+  const nowYear = now.getFullYear();
+  const nowMonth = now.getMonth();
+  
+  let years = nowYear - birthYear;
+  let months = nowMonth - birthMonth;
+  
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
   
   if (years === 0) {
-    return `${months < 0 ? 12 + months : months} months`;
-  }
-  if (months < 0) {
-    return `${years - 1} years, ${12 + months} months`;
+    return `${months} months`;
   }
   return `${years} years, ${months} months`;
 }
@@ -86,6 +101,9 @@ export default function PetDetailPage() {
   const [allergyForm, setAllergyForm] = useState({ name: "", reactions: "", severity: "mild" as "mild" | "severe", documentUrl: "" });
   const [addingAllergy, setAddingAllergy] = useState(false);
   const [editingAllergyId, setEditingAllergyId] = useState<string | null>(null);
+
+  // Document preview modal state
+  const [documentPreview, setDocumentPreview] = useState<{ url: string; title: string } | null>(null);
 
   const animalTypes = ["Dog", "Cat", "Bird", "Fish", "Rabbit", "Hamster", "Turtle", "Snake", "Other"];
 
@@ -276,7 +294,7 @@ export default function PetDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center py-20">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2D4D3A]"></div>
       </div>
     );
@@ -284,7 +302,7 @@ export default function PetDetailPage() {
 
   if (!pet) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center py-20">
         <div className="text-gray-500">Pet not found</div>
       </div>
     );
@@ -299,7 +317,7 @@ export default function PetDetailPage() {
   const overdueVaccines = upcomingVaccines.filter((v) => v.nextDue! < new Date());
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Back Link */}
         <Link href="/pets" className="text-[#2D4D3A] hover:underline mb-6 inline-flex items-center gap-2">
@@ -319,6 +337,7 @@ export default function PetDetailPage() {
                 width={120}
                 height={120}
                 className="rounded-full object-cover"
+                style={{ width: 120, height: 120 }}
               />
             ) : (
               <div className="w-[120px] h-[120px] rounded-full bg-gray-200 flex items-center justify-center">
@@ -430,14 +449,6 @@ export default function PetDetailPage() {
                           <p className="text-sm text-gray-500">
                             Administered: {formatDate(vaccine.dateAdministered)}
                           </p>
-                          {vaccine.documentUrl && (
-                            <a href={vaccine.documentUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline flex items-center gap-1 mt-1">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                              </svg>
-                              View document
-                            </a>
-                          )}
                         </div>
                         <div className="flex items-center gap-1">
                           {vaccine.isRecurring && vaccine.intervalMonths && (
@@ -461,6 +472,17 @@ export default function PetDetailPage() {
                         <p className={`text-sm mt-1 ${isOverdue ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
                           {isOverdue ? 'Overdue since' : 'Next due'}: {formatDate(nextDue.toISOString())}
                         </p>
+                      )}
+                      {vaccine.documentUrl && (
+                        <button 
+                          onClick={() => setDocumentPreview({ url: vaccine.documentUrl!, title: `${vaccine.name} - Vaccine Document` })}
+                          className="text-sm text-blue-600 hover:underline flex items-center gap-1 mt-1"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                          </svg>
+                          View document
+                        </button>
                       )}
                     </li>
                   );
@@ -504,12 +526,15 @@ export default function PetDetailPage() {
                           </p>
                         )}
                         {allergy.documentUrl && (
-                          <a href={allergy.documentUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline flex items-center gap-1 mt-1">
+                          <button 
+                            onClick={() => setDocumentPreview({ url: allergy.documentUrl!, title: `${allergy.name} - Allergy Document` })}
+                            className="text-sm text-blue-600 hover:underline flex items-center gap-1 mt-1"
+                          >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                             </svg>
                             View document
-                          </a>
+                          </button>
                         )}
                       </div>
                       <div className="flex items-center gap-1">
@@ -542,7 +567,7 @@ export default function PetDetailPage() {
         {/* Upcoming Vaccines */}
         {upcomingVaccines.length > 0 && (
           <div className="bg-white rounded-xl shadow-md p-6 mt-6">
-            <h2 className="text-xl font-semibold text-[#2D4D3A] mb-4">Upcoming Vaccine Schedule</h2>
+            <h2 className="text-xl font-semibold text-[#2D4D3A] mb-4">Vaccine Schedule</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -556,7 +581,7 @@ export default function PetDetailPage() {
                 <tbody>
                   {upcomingVaccines.map((v) => {
                     const isOverdue = v.nextDue! < new Date();
-                    const daysUntil = Math.ceil((v.nextDue!.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                    const daysUntil = Math.floor((v.nextDue!.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
                     
                     return (
                       <tr key={v.id} className="border-b border-gray-100">
@@ -915,6 +940,49 @@ export default function PetDetailPage() {
                   {deleting ? "Deleting..." : "Delete"}
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Document Preview Modal */}
+        {documentPreview && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={() => setDocumentPreview(null)}>
+            <div className="bg-white rounded-lg p-4 max-w-4xl max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-800">{documentPreview.title}</h2>
+                <button
+                  onClick={() => setDocumentPreview(null)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              {documentPreview.url.startsWith('data:application/pdf') ? (
+                <div className="text-center py-8">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  <p className="text-gray-600 mb-4">PDF Document</p>
+                  <a
+                    href={documentPreview.url}
+                    download={`${documentPreview.title}.pdf`}
+                    className="inline-flex items-center gap-2 bg-[#2D4D3A] text-white px-4 py-2 rounded-md hover:bg-[#1f3528]"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download PDF
+                  </a>
+                </div>
+              ) : (
+                <img 
+                  src={documentPreview.url} 
+                  alt={documentPreview.title}
+                  className="max-w-full max-h-[70vh] object-contain mx-auto"
+                />
+              )}
             </div>
           </div>
         )}

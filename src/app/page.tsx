@@ -40,8 +40,12 @@ export default function Dashboard() {
     const dueVaccines = pet.vaccines.filter((vaccine) => {
       if (!vaccine.isRecurring || !vaccine.intervalMonths) return false;
       const lastAdministered = new Date(vaccine.dateAdministered);
-      const nextDueDate = new Date(lastAdministered);
-      nextDueDate.setMonth(lastAdministered.getMonth() + vaccine.intervalMonths);
+      // Use UTC to avoid timezone shift
+      const nextDueDate = new Date(Date.UTC(
+        lastAdministered.getUTCFullYear(),
+        lastAdministered.getUTCMonth() + vaccine.intervalMonths,
+        lastAdministered.getUTCDate()
+      ));
 
       return nextDueDate >= now && nextDueDate <= soonThreshold;
     });
@@ -66,10 +70,10 @@ export default function Dashboard() {
     const map: Record<number, CalendarEvent[]> = {};
 
     pets.forEach((pet) => {
-      // Birthdays - check if birthday falls in current month
+      // Birthdays - check if birthday falls in current month (use UTC to avoid timezone shift)
       const dob = new Date(pet.dateOfBirth);
-      if (dob.getMonth() === currentMonth) {
-        const day = dob.getDate();
+      if (dob.getUTCMonth() === currentMonth) {
+        const day = dob.getUTCDate();
         if (!map[day]) map[day] = [];
         map[day].push({
           type: "birthday",
@@ -79,15 +83,18 @@ export default function Dashboard() {
         });
       }
 
-      // Vaccine due dates
+      // Vaccine due dates (use UTC to avoid timezone shift)
       pet.vaccines.forEach((vaccine) => {
         if (!vaccine.isRecurring || !vaccine.intervalMonths) return;
         const administered = new Date(vaccine.dateAdministered);
-        const nextDue = new Date(administered);
-        nextDue.setMonth(nextDue.getMonth() + vaccine.intervalMonths);
+        const nextDue = new Date(Date.UTC(
+          administered.getUTCFullYear(),
+          administered.getUTCMonth() + vaccine.intervalMonths,
+          administered.getUTCDate()
+        ));
 
-        if (nextDue.getMonth() === currentMonth && nextDue.getFullYear() === currentYear) {
-          const day = nextDue.getDate();
+        if (nextDue.getUTCMonth() === currentMonth && nextDue.getUTCFullYear() === currentYear) {
+          const day = nextDue.getUTCDate();
           if (!map[day]) map[day] = [];
           map[day].push({
             type: "vaccine",
@@ -120,7 +127,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center py-20">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2D4D3A]"></div>
       </div>
     );
@@ -178,7 +185,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
 
       {/* Stats Cards */}

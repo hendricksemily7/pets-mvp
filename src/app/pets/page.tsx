@@ -72,7 +72,6 @@ export default function PetsPage() {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
       pet.name.toLowerCase().includes(searchLower) ||
-      pet.ownerName.toLowerCase().includes(searchLower) ||
       (pet.animalType && pet.animalType.toLowerCase().includes(searchLower));
     const matchesType =
       !filterType ||
@@ -82,14 +81,14 @@ export default function PetsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center py-20">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2D4D3A]"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
@@ -149,7 +148,7 @@ export default function PetsPage() {
               >
                 <div className="flex items-center gap-4">
                   {pet.photoUrl ? (
-                    <Image src={pet.photoUrl} alt={pet.name} width={80} height={80} className="rounded-full object-cover" />
+                    <Image src={pet.photoUrl} alt={pet.name} width={80} height={80} className="rounded-full object-cover" style={{ width: 80, height: 80 }} />
                     ): (undefined)}
 
                   

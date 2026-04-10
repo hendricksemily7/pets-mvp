@@ -4,13 +4,8 @@
  * Admin Dashboard for admins to view pet related statistics.
  */
 import { useState, useEffect } from "react";
-import { Playfair_Display } from "next/font/google";
 import Link from "next/link";
 
-const playfair = Playfair_Display({
-  weight: "400",
-  subsets: ["latin"],
-});
 
 interface DashboardStats {
   totalPets: number;
@@ -54,17 +49,12 @@ interface DashboardStats {
 function StatCard({
   title,
   value,
-  icon,
-  color = "bg-blue-500",
 }: {
   title: string;
   value: number | string;
-  icon: string;
-  color?: string;
 }) {
   return (
     <div className="bg-white rounded-xl shadow-md p-6 flex items-center gap-4">
-      <div className={`${color} text-white p-3 rounded-lg text-2xl`}>{icon}</div>
       <div>
         <p className="text-gray-500 text-sm">{title}</p>
         <p className="text-2xl font-bold text-gray-800">{value}</p>
@@ -98,7 +88,7 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center py-20">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2D4D3A] mx-auto mb-4"></div>
           <p className="text-gray-500">Loading dashboard...</p>
@@ -109,7 +99,7 @@ export default function AdminDashboard() {
 
   if (error || !stats) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center py-20">
         <div className="text-center text-red-500">
           <p>{error || "Something went wrong"}</p>
         </div>
@@ -118,12 +108,12 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1
-            className={`${playfair.className} text-3xl md:text-4xl font-medium text-[#2D4D3A]`}
+            className={"text-3xl md:text-4xl font-medium text-[#2D4D3A]"}
           >
             Admin Dashboard
           </h1>
@@ -137,26 +127,18 @@ export default function AdminDashboard() {
           <StatCard
             title="Total Pets"
             value={stats.totalPets}
-            icon="🐾"
-            color="bg-[#2D4D3A]"
           />
           <StatCard
             title="Total Vaccines"
             value={stats.totalVaccines}
-            icon="💉"
-            color="bg-blue-500"
           />
           <StatCard
             title="Total Allergies"
             value={stats.totalAllergies}
-            icon="⚠️"
-            color="bg-yellow-500"
           />
           <StatCard
             title="Severe Allergies"
             value={stats.severeAllergies}
-            icon="🚨"
-            color="bg-red-500"
           />
         </div>
 
@@ -233,37 +215,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Bottom Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recently Added Pets */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Recently Added Pets
-            </h2>
-            {stats.recentPets.length === 0 ? (
-              <p className="text-gray-400 text-center py-4">No pets yet</p>
-            ) : (
-              <div className="space-y-3">
-                {stats.recentPets.map((pet) => (
-                  <Link
-                    key={pet.id}
-                    href={`/pets/${pet.id}`}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-800">{pet.name}</p>
-                      <p className="text-sm text-gray-500">
-                        Owner: {pet.ownerName}
-                      </p>
-                    </div>
-                    <p className="text-xs text-gray-400">
-                      {new Date(pet.createdAt).toLocaleDateString()}
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-
+        <div className="grid grid-cols-1 lg:grid-cols-1">
           {/* Pets with Allergies */}
           <div className="bg-white rounded-xl shadow-md p-6">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">

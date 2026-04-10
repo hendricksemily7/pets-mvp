@@ -23,7 +23,7 @@ export const createPetSchema = z.object({
   animalType: z.string().min(1),
   dateOfBirth: z.coerce.date(),
   ownerName: z.string().min(1),
-  photoUrl: z.string().url().optional(),
+  photoUrl: z.string().min(1).optional(),
 });
 
 export const updatePetSchema = createPetSchema.partial();

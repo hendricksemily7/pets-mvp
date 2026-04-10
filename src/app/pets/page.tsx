@@ -63,6 +63,7 @@ export default function PetsPage() {
           animalType: newPet.animalType,
           dateOfBirth: new Date(newPet.dateOfBirth).toISOString(),
           ownerName: newPet.ownerName.trim() || "Unknown Owner",
+          photoUrl: newPet.photoUrl || undefined,
         }),
       });
 

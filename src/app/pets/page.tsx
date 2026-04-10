@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Pet } from "../types";
+import { toast } from "../components/Toast";
 
 const animalTypes = ["Dog", "Cat", "Bird", "Fish", "Rabbit", "Hamster", "Turtle", "Snake", "Other"];
 
@@ -21,6 +22,7 @@ export default function PetsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("");
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const fetchPets = useCallback(async () => {
     try {
@@ -38,9 +40,18 @@ export default function PetsPage() {
     fetchPets();
   }, [fetchPets]);
 
+  const validatePetForm = () => {
+    const errors: Record<string, string> = {};
+    if (!newPet.name.trim()) errors.name = "Pet name is required";
+    if (!newPet.animalType) errors.animalType = "Animal type is required";
+    if (!newPet.dateOfBirth) errors.dateOfBirth = "Date of birth is required";
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleAddPet = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPet.name.trim() || !newPet.animalType || !newPet.dateOfBirth) return;
+    if (!validatePetForm()) return;
 
     setAddingPet(true);
     try {
@@ -58,10 +69,12 @@ export default function PetsPage() {
       if (!res.ok) throw new Error("Failed to add pet");
 
       setNewPet({ name: "", animalType: "", dateOfBirth: "", ownerName: "", photoUrl: "" });
+      setFormErrors({});
       setShowAddModal(false);
+      toast("Pet added successfully", "success");
       await fetchPets();
     } catch (err) {
-      alert("Failed to add pet");
+      toast("Failed to add pet", "error");
     } finally {
       setAddingPet(false);
     }
@@ -192,19 +205,24 @@ export default function PetsPage() {
                     type="text"
                     placeholder="e.g., Buddy"
                     value={newPet.name}
-                    onChange={(e) => setNewPet({ ...newPet, name: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-[#2D4D3A]"
-                    required
+                    onChange={(e) => {
+                      setNewPet({ ...newPet, name: e.target.value });
+                      if (formErrors.name) setFormErrors({ ...formErrors, name: "" });
+                    }}
+                    className={`w-full border rounded-md px-4 py-2 focus:outline-none focus:border-[#2D4D3A] ${formErrors.name ? 'border-red-500' : 'border-gray-300'}`}
                   />
+                  {formErrors.name && <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Animal Type *</label>
                   <select
                     value={newPet.animalType}
-                    onChange={(e) => setNewPet({ ...newPet, animalType: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-[#2D4D3A]"
-                    required
+                    onChange={(e) => {
+                      setNewPet({ ...newPet, animalType: e.target.value });
+                      if (formErrors.animalType) setFormErrors({ ...formErrors, animalType: "" });
+                    }}
+                    className={`w-full border rounded-md px-4 py-2 focus:outline-none focus:border-[#2D4D3A] ${formErrors.animalType ? 'border-red-500' : 'border-gray-300'}`}
                   >
                     <option value="">Select type</option>
                     {animalTypes.map((type) => (
@@ -213,6 +231,7 @@ export default function PetsPage() {
                       </option>
                     ))}
                   </select>
+                  {formErrors.animalType && <p className="text-red-500 text-sm mt-1">{formErrors.animalType}</p>}
                 </div>
 
                 <div>
@@ -220,10 +239,13 @@ export default function PetsPage() {
                   <input
                     type="date"
                     value={newPet.dateOfBirth}
-                    onChange={(e) => setNewPet({ ...newPet, dateOfBirth: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-[#2D4D3A]"
-                    required
+                    onChange={(e) => {
+                      setNewPet({ ...newPet, dateOfBirth: e.target.value });
+                      if (formErrors.dateOfBirth) setFormErrors({ ...formErrors, dateOfBirth: "" });
+                    }}
+                    className={`w-full border rounded-md px-4 py-2 focus:outline-none focus:border-[#2D4D3A] ${formErrors.dateOfBirth ? 'border-red-500' : 'border-gray-300'}`}
                   />
+                  {formErrors.dateOfBirth && <p className="text-red-500 text-sm mt-1">{formErrors.dateOfBirth}</p>}
                 </div>
 
                 <div>

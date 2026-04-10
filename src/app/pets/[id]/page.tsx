@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { toast } from "../../components/Toast";
 
 interface Vaccine {
   id: string;
@@ -105,6 +106,11 @@ export default function PetDetailPage() {
   // Document preview modal state
   const [documentPreview, setDocumentPreview] = useState<{ url: string; title: string } | null>(null);
 
+  // Form error states
+  const [editErrors, setEditErrors] = useState<Record<string, string>>({});
+  const [vaccineErrors, setVaccineErrors] = useState<Record<string, string>>({});
+  const [allergyErrors, setAllergyErrors] = useState<Record<string, string>>({});
+
   const animalTypes = ["Dog", "Cat", "Bird", "Fish", "Rabbit", "Hamster", "Turtle", "Snake", "Other"];
 
   const fetchPet = useCallback(async () => {
@@ -135,9 +141,10 @@ export default function PetDetailPage() {
     try {
       const res = await fetch(`/api/pets/${params.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete pet");
+      toast("Pet deleted successfully", "success");
       router.push("/pets");
     } catch (err) {
-      alert("Failed to delete pet");
+      toast("Failed to delete pet", "error");
       setDeleting(false);
     }
   };
@@ -151,11 +158,23 @@ export default function PetDetailPage() {
       ownerName: pet.ownerName,
       photoUrl: pet.photoUrl || "",
     });
+    setEditErrors({});
     setShowEditModal(true);
+  };
+
+  const validateEditForm = () => {
+    const errors: Record<string, string> = {};
+    if (!editForm.name.trim()) errors.name = "Pet name is required";
+    if (!editForm.animalType) errors.animalType = "Animal type is required";
+    if (!editForm.dateOfBirth) errors.dateOfBirth = "Date of birth is required";
+    if (!editForm.ownerName.trim()) errors.ownerName = "Owner name is required";
+    setEditErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateEditForm()) return;
     setSaving(true);
     try {
       const res = await fetch(`/api/pets/${params.id}`, {
@@ -171,16 +190,27 @@ export default function PetDetailPage() {
       });
       if (!res.ok) throw new Error("Failed to update pet");
       setShowEditModal(false);
+      toast("Pet updated successfully", "success");
       await fetchPet();
     } catch (err) {
-      alert("Failed to update pet");
+      toast("Failed to update pet", "error");
     } finally {
       setSaving(false);
     }
   };
 
+  const validateVaccineForm = () => {
+    const errors: Record<string, string> = {};
+    if (!vaccineForm.name.trim()) errors.name = "Vaccine name is required";
+    if (!vaccineForm.dateAdministered) errors.dateAdministered = "Date is required";
+    if (vaccineForm.isRecurring && !vaccineForm.intervalMonths) errors.intervalMonths = "Interval is required";
+    setVaccineErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleAddVaccine = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateVaccineForm()) return;
     setAddingVaccine(true);
     try {
       const url = editingVaccineId 
@@ -197,12 +227,12 @@ export default function PetDetailPage() {
           documentUrl: vaccineForm.documentUrl || undefined,
         }),
       });
-      console.log(res)
       if (!res.ok) throw new Error("Failed to save vaccine");
       closeVaccineModal();
+      toast(editingVaccineId ? "Vaccine updated" : "Vaccine added", "success");
       await fetchPet();
     } catch (err) {
-      alert("Failed to save vaccine");
+      toast("Failed to save vaccine", "error");
     } finally {
       setAddingVaccine(false);
     }
@@ -217,6 +247,7 @@ export default function PetDetailPage() {
       intervalMonths: vaccine.intervalMonths?.toString() || "",
       documentUrl: vaccine.documentUrl || "",
     });
+    setVaccineErrors({});
     setShowVaccineModal(true);
   };
 
@@ -224,6 +255,7 @@ export default function PetDetailPage() {
     setShowVaccineModal(false);
     setEditingVaccineId(null);
     setVaccineForm({ name: "", dateAdministered: "", isRecurring: false, intervalMonths: "", documentUrl: "" });
+    setVaccineErrors({});
   };
 
   const handleDeleteVaccine = async (vaccineId: string) => {
@@ -231,14 +263,23 @@ export default function PetDetailPage() {
     try {
       const res = await fetch(`/api/pets/${params.id}/vaccines/${vaccineId}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete vaccine");
+      toast("Vaccine deleted", "success");
       await fetchPet();
     } catch (err) {
-      alert("Failed to delete vaccine");
+      toast("Failed to delete vaccine", "error");
     }
+  };
+
+  const validateAllergyForm = () => {
+    const errors: Record<string, string> = {};
+    if (!allergyForm.name.trim()) errors.name = "Allergy name is required";
+    setAllergyErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleAddAllergy = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateAllergyForm()) return;
     setAddingAllergy(true);
     try {
       const url = editingAllergyId
@@ -256,9 +297,10 @@ export default function PetDetailPage() {
       });
       if (!res.ok) throw new Error("Failed to save allergy");
       closeAllergyModal();
+      toast(editingAllergyId ? "Allergy updated" : "Allergy added", "success");
       await fetchPet();
     } catch (err) {
-      alert("Failed to save allergy");
+      toast("Failed to save allergy", "error");
     } finally {
       setAddingAllergy(false);
     }
@@ -272,6 +314,7 @@ export default function PetDetailPage() {
       severity: allergy.severity,
       documentUrl: allergy.documentUrl || "",
     });
+    setAllergyErrors({});
     setShowAllergyModal(true);
   };
 
@@ -279,6 +322,7 @@ export default function PetDetailPage() {
     setShowAllergyModal(false);
     setEditingAllergyId(null);
     setAllergyForm({ name: "", reactions: "", severity: "mild", documentUrl: "" });
+    setAllergyErrors({});
   };
 
   const handleDeleteAllergy = async (allergyId: string) => {
@@ -286,9 +330,10 @@ export default function PetDetailPage() {
     try {
       const res = await fetch(`/api/pets/${params.id}/allergies/${allergyId}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete allergy");
+      toast("Allergy deleted", "success");
       await fetchPet();
     } catch (err) {
-      alert("Failed to delete allergy");
+      toast("Failed to delete allergy", "error");
     }
   };
 
@@ -568,7 +613,9 @@ export default function PetDetailPage() {
         {upcomingVaccines.length > 0 && (
           <div className="bg-white rounded-xl shadow-md p-6 mt-6">
             <h2 className="text-xl font-semibold text-[#2D4D3A] mb-4">Vaccine Schedule</h2>
-            <div className="overflow-x-auto">
+            
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200">
@@ -602,6 +649,33 @@ export default function PetDetailPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="sm:hidden space-y-4">
+              {upcomingVaccines.map((v) => {
+                const isOverdue = v.nextDue! < new Date();
+                const daysUntil = Math.floor((v.nextDue!.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                
+                return (
+                  <div key={v.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-medium text-gray-800">{v.name}</h3>
+                      {isOverdue ? (
+                        <span className="text-red-600 font-medium text-sm">Overdue</span>
+                      ) : daysUntil <= 30 ? (
+                        <span className="text-yellow-600 text-sm">Due in {daysUntil} days</span>
+                      ) : (
+                        <span className="text-green-600 text-sm">Up to date</span>
+                      )}
+                    </div>
+                    <div className="text-sm text-gray-500 space-y-1">
+                      <p><span className="text-gray-600">Last Given:</span> {formatDate(v.dateAdministered)}</p>
+                      <p><span className="text-gray-600">Next Due:</span> {formatDate(v.nextDue!.toISOString())}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

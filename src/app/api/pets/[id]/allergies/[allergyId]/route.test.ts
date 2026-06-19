@@ -1,5 +1,5 @@
 import { GET, PATCH, DELETE } from './route';
-import * as allergiesDb from '@/db/allergies';
+import * as allergiesDb from '@/db/allergyName';
 
 // Mock the database functions
 jest.mock('@/db/allergies');

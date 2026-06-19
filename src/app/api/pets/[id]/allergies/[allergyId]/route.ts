@@ -1,4 +1,4 @@
-import { updateAllergy, deleteAllergy, getAllergyById } from "@/db/allergies";
+import { updateAllergy, deleteAllergy, getAllergyById } from "@/db/allergyName";
 import { updateAllergySchema } from "@/lib/validations";
 
 // GET /api/pets/[id]/allergies/[allergyId] - Get a single allergy

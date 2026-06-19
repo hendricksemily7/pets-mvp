@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma generate && prisma migrate deploy && next build",
+    "build": "next build",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint .",
     "setup": "npm install && docker-compose up -d && sleep 3 && npx prisma generate && npx prisma migrate dev --name init",
@@ -13,6 +15,7 @@
     "db:reset": "npx prisma migrate reset",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "test": "jest",
     "test:watch": "jest --watch"

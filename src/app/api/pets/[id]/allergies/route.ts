@@ -1,4 +1,4 @@
-import { createAllergy } from "@/db/allergies";
+import { createAllergy } from "@/db/allergyName";
 import { createAllergySchema } from "@/lib/validations";
 
 // POST /api/pets/[id]/allergies - Add an allergy to a pet

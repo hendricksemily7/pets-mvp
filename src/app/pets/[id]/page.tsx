@@ -23,6 +23,10 @@ interface Allergy {
   documentUrl?: string;
 }
 
+interface AllergyName {
+  name: string;
+}
+
 interface Pet {
   id: string;
   name: string;
@@ -84,12 +88,15 @@ export default function PetDetailPage() {
   const params = useParams();
   const router = useRouter();
   const [pet, setPet] = useState<Pet | null>(null);
+  const [allergyNames, setAllergyNames] = useState<AllergyName[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({ name: "", animalType: "", dateOfBirth: "", ownerName: "", photoUrl: "" });
   const [saving, setSaving] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
   
   // Vaccine modal state
   const [showVaccineModal, setShowVaccineModal] = useState(false);
@@ -110,8 +117,37 @@ export default function PetDetailPage() {
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
   const [vaccineErrors, setVaccineErrors] = useState<Record<string, string>>({});
   const [allergyErrors, setAllergyErrors] = useState<Record<string, string>>({});
+  // const [allergyNameErrors, setAllergyNameErrors] = useState<Record<string, string>>({});
 
   const animalTypes = ["Dog", "Cat", "Bird", "Fish", "Rabbit", "Hamster", "Turtle", "Snake", "Other"];
+
+  const fetchAlleryNames = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/allergyNames`);
+      if (!res.ok) throw new Error("Failed to fetch allergy names");
+      const data = await res.json();
+      setAllergyNames(data.allergyNames);
+    } catch (err) {
+      console.error("Failed to fetch allergy names:", err);
+    }
+    finally {
+      setLoading(false);
+    }
+  }, [[], router]);
+
+  useEffect(() => {
+    fetchAlleryNames();
+  }, []);
+    
+
+
+  // Filter allergy names by search term
+  const filteredAllergyNames = allergyNames.filter((allergyName) => {
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch =
+      allergyName.name.toLowerCase().includes(searchLower)
+    return matchesSearch;
+  });
 
   const fetchPet = useCallback(async () => {
     try {
@@ -911,15 +947,25 @@ export default function PetDetailPage() {
 
               <form onSubmit={handleAddAllergy} className="space-y-4">
                 <div>
+                  
                   <label className="block text-sm font-medium text-gray-700 mb-1">Allergy Name *</label>
-                  <input
+                  {/* Filtered Allergy Names based on user input and what's in the database*/}
+                <input
+                    type="text"
+                    placeholder="e.g., Peanuts"
+                    value={allergyForm.name}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-[#2D4D3A]"
+                    required
+                  />
+                  {/* <input
                     type="text"
                     placeholder="e.g., Peanuts"
                     value={allergyForm.name}
                     onChange={(e) => setAllergyForm({ ...allergyForm, name: e.target.value })}
                     className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-[#2D4D3A]"
                     required
-                  />
+                  /> */}
                 </div>
 
                 <div>

@@ -43,6 +43,7 @@ npm run dev
 |---------|-------------|
 | `npm run dev` | Start dev server with Turbopack |
 | `npm run build` | Build for production |
+| `npm run vercel-build` | Vercel deploy build, including Prisma migrations |
 | `npm run start` | Start production server |
 | `npm run setup` | One-time project setup |
 | `npm run db:up` | Start PostgreSQL container |
@@ -50,6 +51,7 @@ npm run dev
 | `npm run db:reset` | Reset database (drops all data) |
 | `npm run prisma:studio` | Open Prisma Studio GUI |
 | `npm run prisma:migrate` | Create new migration |
+| `npm run prisma:migrate:deploy` | Apply existing migrations to a database |
 | `npm test` | Run tests |
 
 ## Prisma Studio
@@ -89,11 +91,15 @@ src/
 
 ## Environment Variables
 
-Copy `.env.example` to `.env`. Default values work with Docker setup:
+Copy `.env.example` to `.env` for local development.
 
 ```
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/novellia_pets"
 ```
+
+For Vercel, set `DATABASE_URL` to your Neon connection string in the project settings. Vercel will run `npm run vercel-build`, which applies migrations before the app builds.
+
+If you use Neon's pooled connection string, keep the same value in both local and production environments. The app uses relative `/api/...` requests, so no separate public API URL is required.
 
 ## Tools & Libraries Used
 

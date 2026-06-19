@@ -40,3 +40,12 @@ export async function deleteAllergy(id: string) {
     where: { id },
   });
 }
+
+export async function getAllAllergyNames() {
+  // 
+  const allergyNames = await prisma.allergy.findMany({
+    orderBy: { createdAt: 'desc' },
+    select: {name: true},
+  });
+  return allergyNames;
+}

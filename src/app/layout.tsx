@@ -4,7 +4,7 @@ import NavBar from "./components/NavBar";
 import { ToastProvider } from "./components/Toast";
 
 export const metadata: Metadata = {
-  title: "Novellia Pets",
+  title: "Hendricks Pets",
   description: "Pet medical records management",
 };
 

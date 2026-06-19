@@ -1,4 +1,4 @@
-# Plan: Novellia Pets MVP
+# Plan: Hendricks Pets MVP
 
 ## TL;DR
 Build a fullstack TypeScript pet medical records app using **Next.js 16 + Turbopack**. PostgreSQL + Prisma for persistence. **You implement features; I scaffold the infrastructure.**

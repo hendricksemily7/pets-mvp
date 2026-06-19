@@ -6,9 +6,9 @@ similar).
 Ensure your solution is easily runnable with at most two commands from a Makefile for a
 local app or a README on how to run a hosted version.
 
-# Project: Novellia Pets
-Novellia Pets is a new service spun off from Novellia where we gather and display medical
-records for your furry friend. You will be building the MVP of Novellia Pets which will consist of:
+# Project: Hendricks Pets
+Hendricks Pets is a new service spun off from Hendricks where we gather and display medical
+records for your furry friend. You will be building the MVP of Hendricks Pets which will consist of:
 
 # Core Features:
 1. Pet Management - Create, view, edit, and delete pets

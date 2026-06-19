@@ -12,7 +12,7 @@ export default function NavBar() {
         <div className="flex justify-between h-16">
           <div className="flex items-center space-x-8">
             <Link href="/" className="text-xl font-bold text-slate-50 hover:text-slate-300 transition-colors">
-              Novellia Pets
+              Hendricks Pets
             </Link>
             {/* Desktop nav links */}
             <div className="hidden sm:flex space-x-1">

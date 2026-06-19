@@ -1,4 +1,4 @@
-# Novellia Pets MVP
+# Hendricks Pets MVP
 
 Pet medical records management system built with Next.js, React, PostgreSQL, and Prisma.
 
@@ -94,7 +94,7 @@ src/
 Copy `.env.example` to `.env` for local development.
 
 ```
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/novellia_pets"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/hendricks_pets"
 ```
 
 For Vercel, set `DATABASE_URL` to your Neon connection string in the project settings. Vercel will run `npm run vercel-build`, which applies migrations before the app builds.
